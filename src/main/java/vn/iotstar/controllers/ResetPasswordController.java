@@ -1,6 +1,8 @@
 package vn.iotstar.controllers;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -35,17 +37,32 @@ public class ResetPasswordController extends HttpServlet {
         String newPassword = req.getParameter("newPassword");
         String confirmPassword = req.getParameter("confirmPassword");
 
-        if (email == null || email.trim().isEmpty() ||
-            otp == null || otp.trim().isEmpty() ||
-            newPassword == null || newPassword.trim().isEmpty() ||
-            confirmPassword == null || confirmPassword.trim().isEmpty()) {
-            req.setAttribute("error", "Vui lòng điền đầy đủ các thông tin!");
-            req.getRequestDispatcher("/views/auth/reset-password.jsp").forward(req, resp);
-            return;
+        Map<String, String> errors = new HashMap<>();
+
+        if (email == null || email.trim().isEmpty()) {
+            errors.put("email", "Vui lòng nhập địa chỉ email!");
         }
 
-        if (!newPassword.equals(confirmPassword)) {
-            req.setAttribute("error", "Xác nhận mật khẩu mới không khớp!");
+        if (otp == null || otp.trim().isEmpty()) {
+            errors.put("otp", "Vui lòng nhập mã OTP!");
+        } else if (!otp.trim().matches("^[0-9]{6}$")) {
+            errors.put("otp", "Mã OTP phải gồm đúng 6 chữ số!");
+        }
+
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            errors.put("newPassword", "Vui lòng nhập mật khẩu mới!");
+        } else if (newPassword.trim().length() < 6) {
+            errors.put("newPassword", "Mật khẩu mới phải có tối thiểu 6 ký tự!");
+        }
+
+        if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+            errors.put("confirmPassword", "Vui lòng xác nhận lại mật khẩu!");
+        } else if (!confirmPassword.equals(newPassword)) {
+            errors.put("confirmPassword", "Xác nhận mật khẩu không khớp với mật khẩu mới!");
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
             req.setAttribute("email", email);
             req.setAttribute("otp", otp);
             req.getRequestDispatcher("/views/auth/reset-password.jsp").forward(req, resp);
@@ -57,6 +74,7 @@ public class ResetPasswordController extends HttpServlet {
         if (!isValidOtp) {
             req.setAttribute("error", "Mã OTP không chính xác hoặc đã hết hạn (sau 5 phút)!");
             req.setAttribute("email", email.trim());
+            req.setAttribute("otp", otp.trim());
             req.getRequestDispatcher("/views/auth/reset-password.jsp").forward(req, resp);
             return;
         }
@@ -68,6 +86,7 @@ public class ResetPasswordController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/login?reset=true");
         } else {
             req.setAttribute("error", "Có lỗi xảy ra khi cập nhật mật khẩu. Vui lòng thử lại!");
+            req.setAttribute("email", email.trim());
             req.getRequestDispatcher("/views/auth/reset-password.jsp").forward(req, resp);
         }
     }

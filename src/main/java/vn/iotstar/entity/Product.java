@@ -13,6 +13,10 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,15 +36,21 @@ public class Product implements Serializable {
     @Column(name = "productId")
     private int productId;
 
+    @NotBlank(message = "Tên sản phẩm không được để trống")
+    @Size(min = 2, max = 200, message = "Tên sản phẩm từ 2 đến 200 ký tự")
     @Column(name = "productName", columnDefinition = "NVARCHAR(255) NOT NULL")
     private String productName;
 
     @Column(name = "description", columnDefinition = "NVARCHAR(MAX) NULL")
     private String description;
 
+    @NotNull(message = "Giá sản phẩm không được để trống")
+    @Min(value = 0, message = "Giá sản phẩm phải lớn hơn hoặc bằng 0")
     @Column(name = "price")
     private Double price;
 
+    @NotNull(message = "Số lượng không được để trống")
+    @Min(value = 0, message = "Số lượng tồn kho phải lớn hơn hoặc bằng 0")
     @Column(name = "quantity")
     private Integer quantity = 0;
 

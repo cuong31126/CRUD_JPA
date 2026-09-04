@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -55,15 +57,19 @@ public class AdminProductController extends HttpServlet {
             req.setAttribute("categories", categories);
             req.getRequestDispatcher("/views/admin/product-add.jsp").forward(req, resp);
         } else if (url.contains("/admin/product/edit")) {
-            int id = Integer.parseInt(req.getParameter("id"));
-            Product product = productService.findById(id);
-            List<Category> categories = categoryService.findAll();
-            req.setAttribute("product", product);
-            req.setAttribute("categories", categories);
-            req.getRequestDispatcher("/views/admin/product-edit.jsp").forward(req, resp);
-        } else if (url.contains("/admin/product/delete")) {
-            int id = Integer.parseInt(req.getParameter("id"));
             try {
+                int id = Integer.parseInt(req.getParameter("id"));
+                Product product = productService.findById(id);
+                List<Category> categories = categoryService.findAll();
+                req.setAttribute("product", product);
+                req.setAttribute("categories", categories);
+                req.getRequestDispatcher("/views/admin/product-edit.jsp").forward(req, resp);
+            } catch (Exception e) {
+                resp.sendRedirect(req.getContextPath() + "/admin/products");
+            }
+        } else if (url.contains("/admin/product/delete")) {
+            try {
+                int id = Integer.parseInt(req.getParameter("id"));
                 productService.delete(id);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -81,15 +87,86 @@ public class AdminProductController extends HttpServlet {
         if (url.contains("/admin/product/insert")) {
             String productName = req.getParameter("productName");
             String description = req.getParameter("description");
-            double price = Double.parseDouble(req.getParameter("price"));
-            int quantity = Integer.parseInt(req.getParameter("quantity"));
-            int status = Integer.parseInt(req.getParameter("status"));
-            int categoryId = Integer.parseInt(req.getParameter("categoryId"));
+            String priceStr = req.getParameter("price");
+            String quantityStr = req.getParameter("quantity");
+            String statusStr = req.getParameter("status");
+            String categoryIdStr = req.getParameter("categoryId");
             String onlineImage = req.getParameter("images");
 
+            Map<String, String> errors = new HashMap<>();
+
+            // 1. Validation productName
+            if (productName == null || productName.trim().isEmpty()) {
+                errors.put("productName", "Tên sản phẩm không được để trống!");
+            } else if (productName.trim().length() < 2 || productName.trim().length() > 200) {
+                errors.put("productName", "Tên sản phẩm phải từ 2 đến 200 ký tự!");
+            }
+
+            // 2. Validation categoryId
+            int categoryId = 0;
+            if (categoryIdStr == null || categoryIdStr.trim().isEmpty()) {
+                errors.put("categoryId", "Vui lòng chọn danh mục cho sản phẩm!");
+            } else {
+                try {
+                    categoryId = Integer.parseInt(categoryIdStr.trim());
+                } catch (NumberFormatException e) {
+                    errors.put("categoryId", "Danh mục không hợp lệ!");
+                }
+            }
+
+            // 3. Validation price
+            double price = 0;
+            if (priceStr == null || priceStr.trim().isEmpty()) {
+                errors.put("price", "Giá sản phẩm không được để trống!");
+            } else {
+                try {
+                    price = Double.parseDouble(priceStr.trim());
+                    if (price < 0) {
+                        errors.put("price", "Giá sản phẩm phải lớn hơn hoặc bằng 0!");
+                    }
+                } catch (NumberFormatException e) {
+                    errors.put("price", "Định dạng giá không hợp lệ!");
+                }
+            }
+
+            // 4. Validation quantity
+            int quantity = 0;
+            if (quantityStr == null || quantityStr.trim().isEmpty()) {
+                errors.put("quantity", "Số lượng tồn kho không được để trống!");
+            } else {
+                try {
+                    quantity = Integer.parseInt(quantityStr.trim());
+                    if (quantity < 0) {
+                        errors.put("quantity", "Số lượng phải lớn hơn hoặc bằng 0!");
+                    }
+                } catch (NumberFormatException e) {
+                    errors.put("quantity", "Số lượng phải là số nguyên!");
+                }
+            }
+
+            int status = 1;
+            try {
+                if (statusStr != null) {
+                    status = Integer.parseInt(statusStr);
+                }
+            } catch (NumberFormatException ignored) {}
+
+            if (!errors.isEmpty()) {
+                req.setAttribute("errors", errors);
+                req.setAttribute("productName", productName);
+                req.setAttribute("description", description);
+                req.setAttribute("price", priceStr);
+                req.setAttribute("quantity", quantityStr);
+                req.setAttribute("status", status);
+                req.setAttribute("categoryId", categoryId);
+                req.setAttribute("categories", categoryService.findAll());
+                req.getRequestDispatcher("/views/admin/product-add.jsp").forward(req, resp);
+                return;
+            }
+
             Product product = new Product();
-            product.setProductName(productName);
-            product.setDescription(description);
+            product.setProductName(productName.trim());
+            product.setDescription(description != null ? description.trim() : "");
             product.setPrice(price);
             product.setQuantity(quantity);
             product.setStatus(status);
@@ -107,7 +184,14 @@ public class AdminProductController extends HttpServlet {
             }
 
             try {
-                Part part = req.getPart("imageFile");
+                Part part = null;
+                try {
+                    part = req.getPart("images");
+                    if (part == null || part.getSize() == 0) {
+                        part = req.getPart("imageFile");
+                    }
+                } catch (Exception ignored) {}
+
                 if (part != null && part.getSize() > 0) {
                     String filename = Paths.get(part.getSubmittedFileName()).getFileName().toString();
                     int index = filename.lastIndexOf(".");
@@ -128,21 +212,96 @@ public class AdminProductController extends HttpServlet {
             productService.insert(product);
             resp.sendRedirect(req.getContextPath() + "/admin/products");
 
-        } else if (url.contains("/admin/product/update")) {
+        } else if (url.contains("/admin/product/edit") || url.contains("/admin/product/update")) {
             int productId = Integer.parseInt(req.getParameter("productId"));
             String productName = req.getParameter("productName");
             String description = req.getParameter("description");
-            double price = Double.parseDouble(req.getParameter("price"));
-            int quantity = Integer.parseInt(req.getParameter("quantity"));
-            int status = Integer.parseInt(req.getParameter("status"));
-            int categoryId = Integer.parseInt(req.getParameter("categoryId"));
+            String priceStr = req.getParameter("price");
+            String quantityStr = req.getParameter("quantity");
+            String statusStr = req.getParameter("status");
+            String categoryIdStr = req.getParameter("categoryId");
             String onlineImage = req.getParameter("images");
 
-            Product product = productService.findById(productId);
-            String fileold = product.getImages();
+            Map<String, String> errors = new HashMap<>();
 
-            product.setProductName(productName);
-            product.setDescription(description);
+            // 1. Validation productName
+            if (productName == null || productName.trim().isEmpty()) {
+                errors.put("productName", "Tên sản phẩm không được để trống!");
+            } else if (productName.trim().length() < 2 || productName.trim().length() > 200) {
+                errors.put("productName", "Tên sản phẩm phải từ 2 đến 200 ký tự!");
+            }
+
+            // 2. Validation categoryId
+            int categoryId = 0;
+            if (categoryIdStr == null || categoryIdStr.trim().isEmpty()) {
+                errors.put("categoryId", "Vui lòng chọn danh mục cho sản phẩm!");
+            } else {
+                try {
+                    categoryId = Integer.parseInt(categoryIdStr.trim());
+                } catch (NumberFormatException e) {
+                    errors.put("categoryId", "Danh mục không hợp lệ!");
+                }
+            }
+
+            // 3. Validation price
+            double price = 0;
+            if (priceStr == null || priceStr.trim().isEmpty()) {
+                errors.put("price", "Giá sản phẩm không được để trống!");
+            } else {
+                try {
+                    price = Double.parseDouble(priceStr.trim());
+                    if (price < 0) {
+                        errors.put("price", "Giá sản phẩm phải lớn hơn hoặc bằng 0!");
+                    }
+                } catch (NumberFormatException e) {
+                    errors.put("price", "Định dạng giá không hợp lệ!");
+                }
+            }
+
+            // 4. Validation quantity
+            int quantity = 0;
+            if (quantityStr == null || quantityStr.trim().isEmpty()) {
+                errors.put("quantity", "Số lượng tồn kho không được để trống!");
+            } else {
+                try {
+                    quantity = Integer.parseInt(quantityStr.trim());
+                    if (quantity < 0) {
+                        errors.put("quantity", "Số lượng phải lớn hơn hoặc bằng 0!");
+                    }
+                } catch (NumberFormatException e) {
+                    errors.put("quantity", "Số lượng phải là số nguyên!");
+                }
+            }
+
+            int status = 1;
+            try {
+                if (statusStr != null) {
+                    status = Integer.parseInt(statusStr);
+                }
+            } catch (NumberFormatException ignored) {}
+
+            Product product = productService.findById(productId);
+
+            if (!errors.isEmpty()) {
+                req.setAttribute("errors", errors);
+                product.setProductName(productName);
+                product.setDescription(description);
+                if (priceStr != null && !priceStr.isEmpty()) {
+                    try { product.setPrice(Double.parseDouble(priceStr)); } catch (Exception ignored) {}
+                }
+                if (quantityStr != null && !quantityStr.isEmpty()) {
+                    try { product.setQuantity(Integer.parseInt(quantityStr)); } catch (Exception ignored) {}
+                }
+                product.setStatus(status);
+                req.setAttribute("product", product);
+                req.setAttribute("categories", categoryService.findAll());
+                req.getRequestDispatcher("/views/admin/product-edit.jsp").forward(req, resp);
+                return;
+            }
+
+            String fileold = product.getImages();
+            product.setProductName(productName.trim());
+            product.setDescription(description != null ? description.trim() : "");
             product.setPrice(price);
             product.setQuantity(quantity);
             product.setStatus(status);
@@ -158,7 +317,17 @@ public class AdminProductController extends HttpServlet {
             }
 
             try {
-                Part part = req.getPart("imageFile");
+                Part part = null;
+                try {
+                    part = req.getPart("images_file");
+                    if (part == null || part.getSize() == 0) {
+                        part = req.getPart("imageFile");
+                    }
+                    if (part == null || part.getSize() == 0) {
+                        part = req.getPart("images");
+                    }
+                } catch (Exception ignored) {}
+
                 if (part != null && part.getSize() > 0) {
                     if (fileold != null && !fileold.startsWith("http")) {
                         deleteFile(uploadPath + File.separator + fileold);

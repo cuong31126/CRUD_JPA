@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "categories")
@@ -24,6 +26,8 @@ public class Category implements Serializable {
     @Column(name = "categoryId")
     private int categoryId;
 
+    @NotBlank(message = "Tên danh mục không được để trống")
+    @Size(min = 2, max = 100, message = "Tên danh mục phải từ 2 đến 100 ký tự")
     @Column(name = "categoryname", columnDefinition = "NVARCHAR(255) NULL")
     private String categoryname;
 
@@ -52,7 +56,6 @@ public class Category implements Serializable {
         this.categoryId = categoryId;
     }
 
-    // Compatible alias method
     public int getCategoryid() {
         return this.categoryId;
     }

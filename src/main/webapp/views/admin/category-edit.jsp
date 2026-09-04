@@ -41,11 +41,14 @@
                     <label for="categoryname" class="form-label fw-semibold">
                         Tên Danh Mục <span class="text-danger">*</span>
                     </label>
-                    <div class="input-group">
+                    <div class="input-group has-validation">
                         <span class="input-group-text bg-light"><i class="fa-solid fa-tag text-muted"></i></span>
-                        <input type="text" class="form-control" id="categoryname" name="categoryname" 
+                        <input type="text" class="form-control ${errors['categoryname'] != null ? 'is-invalid' : ''}" 
+                               id="categoryname" name="categoryname" 
                                value="${category.categoryname}" required minlength="2" maxlength="100">
-                        <div class="invalid-feedback">Vui lòng nhập tên danh mục hợp lệ (2 - 100 ký tự).</div>
+                        <div class="invalid-feedback">
+                            ${errors['categoryname'] != null ? errors['categoryname'] : 'Vui lòng nhập tên danh mục hợp lệ (2 - 100 ký tự).'}
+                        </div>
                     </div>
                 </div>
 

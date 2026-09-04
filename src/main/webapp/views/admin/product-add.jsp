@@ -39,12 +39,15 @@
                     <label for="productName" class="form-label fw-semibold">
                         Tên Sản Phẩm <span class="text-danger">*</span>
                     </label>
-                    <div class="input-group">
+                    <div class="input-group has-validation">
                         <span class="input-group-text bg-light"><i class="fa-solid fa-box text-muted"></i></span>
-                        <input type="text" class="form-control" id="productName" name="productName" 
+                        <input type="text" class="form-control ${errors['productName'] != null ? 'is-invalid' : ''}" 
+                               id="productName" name="productName" value="${productName}" 
                                required minlength="2" maxlength="200" 
                                placeholder="Ví dụ: iPhone 15 Pro Max 256GB Titanium">
-                        <div class="invalid-feedback">Vui lòng nhập tên sản phẩm (2 - 200 ký tự).</div>
+                        <div class="invalid-feedback">
+                            ${errors['productName'] != null ? errors['productName'] : 'Vui lòng nhập tên sản phẩm (2 - 200 ký tự).'}
+                        </div>
                     </div>
                 </div>
 
@@ -54,13 +57,15 @@
                         <label for="categoryId" class="form-label fw-semibold">
                             Thuộc Danh Mục <span class="text-danger">*</span>
                         </label>
-                        <select class="form-select" id="categoryId" name="categoryId" required>
+                        <select class="form-select ${errors['categoryId'] != null ? 'is-invalid' : ''}" id="categoryId" name="categoryId" required>
                             <option value="">-- Chọn danh mục --</option>
                             <c:forEach items="${categories}" var="c">
-                                <option value="${c.categoryId}">${c.categoryname}</option>
+                                <option value="${c.categoryId}" ${categoryId == c.categoryId ? 'selected' : ''}>${c.categoryname}</option>
                             </c:forEach>
                         </select>
-                        <div class="invalid-feedback">Vui lòng chọn danh mục cho sản phẩm.</div>
+                        <div class="invalid-feedback">
+                            ${errors['categoryId'] != null ? errors['categoryId'] : 'Vui lòng chọn danh mục cho sản phẩm.'}
+                        </div>
                     </div>
 
                     <!-- Đơn giá (Validation: min 0) -->
@@ -68,12 +73,15 @@
                         <label for="price" class="form-label fw-semibold">
                             Đơn Giá (VNĐ) <span class="text-danger">*</span>
                         </label>
-                        <div class="input-group">
+                        <div class="input-group has-validation">
                             <span class="input-group-text bg-light"><i class="fa-solid fa-tag text-muted"></i></span>
-                            <input type="number" class="form-control" id="price" name="price" 
+                            <input type="number" class="form-control ${errors['price'] != null ? 'is-invalid' : ''}" 
+                                   id="price" name="price" value="${price}" 
                                    required min="0" step="1000" placeholder="500000">
                             <span class="input-group-text">₫</span>
-                            <div class="invalid-feedback">Vui lòng nhập giá hợp lệ (>= 0).</div>
+                            <div class="invalid-feedback">
+                                ${errors['price'] != null ? errors['price'] : 'Vui lòng nhập giá hợp lệ (>= 0).'}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -84,11 +92,14 @@
                         <label for="quantity" class="form-label fw-semibold">
                             Số Lượng Tồn Kho <span class="text-danger">*</span>
                         </label>
-                        <div class="input-group">
+                        <div class="input-group has-validation">
                             <span class="input-group-text bg-light"><i class="fa-solid fa-cubes text-muted"></i></span>
-                            <input type="number" class="form-control" id="quantity" name="quantity" 
-                                   required min="0" value="10" placeholder="10">
-                            <div class="invalid-feedback">Vui lòng nhập số lượng hợp lệ (>= 0).</div>
+                            <input type="number" class="form-control ${errors['quantity'] != null ? 'is-invalid' : ''}" 
+                                   id="quantity" name="quantity" value="${not empty quantity ? quantity : '10'}" 
+                                   required min="0" placeholder="10">
+                            <div class="invalid-feedback">
+                                ${errors['quantity'] != null ? errors['quantity'] : 'Vui lòng nhập số lượng hợp lệ (>= 0).'}
+                            </div>
                         </div>
                     </div>
 
@@ -97,13 +108,13 @@
                         <label class="form-label fw-semibold d-block">Trạng Thái Kinh Doanh</label>
                         <div class="pt-2">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="statusActive" value="1" checked>
+                                <input class="form-check-input" type="radio" name="status" id="statusActive" value="1" ${status == null || status == 1 ? 'checked' : ''}>
                                 <label class="form-check-label text-success fw-semibold" for="statusActive">
                                     <i class="fa-solid fa-check-circle me-1"></i>Đang bán
                                 </label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="status" id="statusInactive" value="0">
+                                <input class="form-check-input" type="radio" name="status" id="statusInactive" value="0" ${status == 0 ? 'checked' : ''}>
                                 <label class="form-check-label text-secondary fw-semibold" for="statusInactive">
                                     <i class="fa-solid fa-ban me-1"></i>Tạm dừng
                                 </label>
@@ -123,7 +134,7 @@
                 <div class="mb-4">
                     <label for="description" class="form-label fw-semibold">Mô Tả Chi Tiết Sản Phẩm</label>
                     <textarea class="form-control" id="description" name="description" rows="4" 
-                              placeholder="Nhập thông số kỹ thuật, bảo hành, đặc điểm nổi bật..."></textarea>
+                              placeholder="Nhập thông số kỹ thuật, bảo hành, đặc điểm nổi bật...">${description}</textarea>
                 </div>
 
                 <!-- Nút Submit -->

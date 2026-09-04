@@ -1,6 +1,8 @@
 package vn.iotstar.controllers;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -50,8 +52,18 @@ public class LoginController extends HttpServlet {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
 
-        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            req.setAttribute("error", "Vui lòng nhập tên đăng nhập và mật khẩu!");
+        Map<String, String> errors = new HashMap<>();
+
+        if (username == null || username.trim().isEmpty()) {
+            errors.put("username", "Vui lòng nhập tên đăng nhập!");
+        }
+        if (password == null || password.trim().isEmpty()) {
+            errors.put("password", "Vui lòng nhập mật khẩu!");
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("username", username);
             req.getRequestDispatcher("/views/auth/login.jsp").forward(req, resp);
             return;
         }
@@ -59,6 +71,7 @@ public class LoginController extends HttpServlet {
         User user = userService.checkLogin(username.trim(), password.trim());
         if (user == null) {
             req.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không chính xác!");
+            req.setAttribute("username", username);
             req.getRequestDispatcher("/views/auth/login.jsp").forward(req, resp);
             return;
         }
@@ -67,6 +80,7 @@ public class LoginController extends HttpServlet {
             HttpSession session = req.getSession();
             session.setAttribute("registeredEmail", user.getEmail());
             req.setAttribute("error", "Tài khoản chưa được kích hoạt! <a href='" + req.getContextPath() + "/verify-otp' class='alert-link'>Kích hoạt ngay</a>");
+            req.setAttribute("username", username);
             req.getRequestDispatcher("/views/auth/login.jsp").forward(req, resp);
             return;
         }

@@ -39,12 +39,15 @@
                     <label for="categoryname" class="form-label fw-semibold">
                         Tên Danh Mục <span class="text-danger">*</span>
                     </label>
-                    <div class="input-group">
+                    <div class="input-group has-validation">
                         <span class="input-group-text bg-light"><i class="fa-solid fa-tag text-muted"></i></span>
-                        <input type="text" class="form-control" id="categoryname" name="categoryname" 
+                        <input type="text" class="form-control ${errors['categoryname'] != null ? 'is-invalid' : ''}" 
+                               id="categoryname" name="categoryname" value="${categoryname}" 
                                required minlength="2" maxlength="100" 
                                placeholder="Ví dụ: Điện Thoại, Laptop, Sách Lập Trình...">
-                        <div class="invalid-feedback">Vui lòng nhập tên danh mục (từ 2 đến 100 ký tự).</div>
+                        <div class="invalid-feedback">
+                            ${errors['categoryname'] != null ? errors['categoryname'] : 'Vui lòng nhập tên danh mục (từ 2 đến 100 ký tự).'}
+                        </div>
                     </div>
                 </div>
 
@@ -63,13 +66,13 @@
                 <div class="mb-4">
                     <label class="form-label fw-semibold d-block">Trạng Thái Kích Hoạt</label>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="status" id="statusActive" value="1" checked>
+                        <input class="form-check-input" type="radio" name="status" id="statusActive" value="1" ${status == null || status == 1 ? 'checked' : ''}>
                         <label class="form-check-label text-success fw-semibold" for="statusActive">
                             <i class="fa-solid fa-circle-check me-1"></i>Hoạt động (Hiển thị)
                         </label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="status" id="statusInactive" value="0">
+                        <input class="form-check-input" type="radio" name="status" id="statusInactive" value="0" ${status == 0 ? 'checked' : ''}>
                         <label class="form-check-label text-secondary fw-semibold" for="statusInactive">
                             <i class="fa-solid fa-lock me-1"></i>Tạm khóa (Ẩn)
                         </label>
@@ -89,7 +92,6 @@
 </div>
 
 <script>
-    // Client-side Bootstrap form validation script
     (function () {
         'use strict'
         var forms = document.querySelectorAll('.needs-validation')

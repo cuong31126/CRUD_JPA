@@ -43,17 +43,6 @@
             opacity: 0.9;
             transform: translateY(-1px);
         }
-        .input-group-text {
-            background-color: #f8f9fa;
-            border-right: none;
-        }
-        .form-control {
-            border-left: none;
-        }
-        .form-control:focus {
-            box-shadow: none;
-            border-color: #dee2e6;
-        }
     </style>
 </head>
 <body>
@@ -75,47 +64,72 @@
                         </div>
                     </c:if>
 
-                    <form action="<c:url value='/register'/>" method="post">
+                    <form action="<c:url value='/register'/>" method="post" class="needs-validation" novalidate>
+                        <!-- Username -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-secondary">Tên đăng nhập <span class="text-danger">*</span></label>
-                            <div class="input-group">
+                            <div class="input-group has-validation">
                                 <span class="input-group-text"><i class="fa-solid fa-user text-muted"></i></span>
-                                <input type="text" name="username" class="form-control" placeholder="Từ 4 - 30 ký tự (chữ và số)" 
-                                       pattern="^[a-zA-Z0-9_]{4,30}$" title="Tên đăng nhập từ 4-30 ký tự (chữ, số hoặc gạch dưới)" required autofocus>
+                                <input type="text" name="username" value="${username}" 
+                                       class="form-control ${errors['username'] != null ? 'is-invalid' : ''}" 
+                                       placeholder="Từ 4 - 30 ký tự (chữ và số)" 
+                                       pattern="^[a-zA-Z0-9_]{4,30}$" required autofocus>
+                                <div class="invalid-feedback">
+                                    ${errors['username'] != null ? errors['username'] : 'Tên đăng nhập từ 4-30 ký tự (chữ, số hoặc gạch dưới)!'}
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Fullname -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-secondary">Họ và tên</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa-solid fa-id-card text-muted"></i></span>
-                                <input type="text" name="fullname" class="form-control" placeholder="Nguyễn Văn A" maxlength="100">
+                                <input type="text" name="fullname" value="${fullname}" class="form-control" placeholder="Nguyễn Văn A" maxlength="100">
                             </div>
                         </div>
 
+                        <!-- Email -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-secondary">Email nhận mã OTP <span class="text-danger">*</span></label>
-                            <div class="input-group">
+                            <div class="input-group has-validation">
                                 <span class="input-group-text"><i class="fa-solid fa-envelope text-muted"></i></span>
-                                <input type="email" name="email" class="form-control" placeholder="example@email.com" 
-                                       pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Vui lòng nhập đúng định dạng email" required>
+                                <input type="email" name="email" value="${email}" 
+                                       class="form-control ${errors['email'] != null ? 'is-invalid' : ''}" 
+                                       placeholder="example@email.com" 
+                                       pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" required>
+                                <div class="invalid-feedback">
+                                    ${errors['email'] != null ? errors['email'] : 'Vui lòng nhập đúng định dạng email RFC!'}
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Phone -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-secondary">Số điện thoại</label>
-                            <div class="input-group">
+                            <div class="input-group has-validation">
                                 <span class="input-group-text"><i class="fa-solid fa-phone text-muted"></i></span>
-                                <input type="tel" name="phone" class="form-control" placeholder="0901234567" 
-                                       pattern="^0[0-9]{9}$" title="Số điện thoại gồm 10 chữ số bắt đầu bằng 0">
+                                <input type="tel" name="phone" value="${phone}" 
+                                       class="form-control ${errors['phone'] != null ? 'is-invalid' : ''}" 
+                                       placeholder="0901234567 (10 số)" 
+                                       pattern="^0[0-9]{9}$">
+                                <div class="invalid-feedback">
+                                    ${errors['phone'] != null ? errors['phone'] : 'Số điện thoại gồm 10 chữ số bắt đầu bằng 0!'}
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Password -->
                         <div class="mb-4">
                             <label class="form-label fw-semibold text-secondary">Mật khẩu <span class="text-danger">*</span></label>
-                            <div class="input-group">
+                            <div class="input-group has-validation">
                                 <span class="input-group-text"><i class="fa-solid fa-lock text-muted"></i></span>
-                                <input type="password" name="password" class="form-control" placeholder="Tối thiểu 6 ký tự" minlength="6" required>
+                                <input type="password" name="password" 
+                                       class="form-control ${errors['password'] != null ? 'is-invalid' : ''}" 
+                                       placeholder="Tối thiểu 6 ký tự" minlength="6" required>
+                                <div class="invalid-feedback">
+                                    ${errors['password'] != null ? errors['password'] : 'Mật khẩu bắt buộc và tối thiểu 6 ký tự!'}
+                                </div>
                             </div>
                         </div>
 
@@ -135,5 +149,20 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
 </body>
 </html>

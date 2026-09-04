@@ -1,6 +1,8 @@
 package vn.iotstar.controllers;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -28,8 +30,17 @@ public class ForgotPasswordController extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         String email = req.getParameter("email");
+        Map<String, String> errors = new HashMap<>();
+
         if (email == null || email.trim().isEmpty()) {
-            req.setAttribute("error", "Vui lòng nhập địa chỉ email!");
+            errors.put("email", "Vui lòng nhập địa chỉ email!");
+        } else if (!email.trim().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+            errors.put("email", "Email không đúng định dạng RFC (Ví dụ: user@example.com)!");
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("email", email);
             req.getRequestDispatcher("/views/auth/forgot-password.jsp").forward(req, resp);
             return;
         }
@@ -37,6 +48,7 @@ public class ForgotPasswordController extends HttpServlet {
         User user = userService.findByEmail(email.trim());
         if (user == null) {
             req.setAttribute("error", "Email này không tồn tại trong hệ thống!");
+            req.setAttribute("email", email);
             req.getRequestDispatcher("/views/auth/forgot-password.jsp").forward(req, resp);
             return;
         }
@@ -51,6 +63,7 @@ public class ForgotPasswordController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/reset-password");
         } else {
             req.setAttribute("error", "Không thể gửi email chứa mã OTP. Vui lòng thử lại sau!");
+            req.setAttribute("email", email);
             req.getRequestDispatcher("/views/auth/forgot-password.jsp").forward(req, resp);
         }
     }

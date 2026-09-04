@@ -1,6 +1,8 @@
 package vn.iotstar.controllers;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -33,25 +35,43 @@ public class RegisterController extends HttpServlet {
         String fullname = req.getParameter("fullname");
         String phone = req.getParameter("phone");
 
-        // Validate đầu vào
-        if (username == null || username.trim().isEmpty() ||
-            password == null || password.trim().isEmpty() ||
-            email == null || email.trim().isEmpty()) {
-            req.setAttribute("error", "Vui lòng nhập đầy đủ các trường bắt buộc!");
-            req.getRequestDispatcher("/views/auth/register.jsp").forward(req, resp);
-            return;
+        Map<String, String> errors = new HashMap<>();
+
+        // 1. Server-side Validation: Username
+        if (username == null || username.trim().isEmpty()) {
+            errors.put("username", "Tên đăng nhập không được để trống!");
+        } else if (!username.trim().matches("^[a-zA-Z0-9_]{4,30}$")) {
+            errors.put("username", "Tên đăng nhập từ 4-30 ký tự, chỉ chứa chữ cái, số và dấu gạch dưới!");
+        } else if (userService.findByUsername(username.trim()) != null) {
+            errors.put("username", "Tên đăng nhập đã được sử dụng!");
         }
 
-        // Kiểm tra trùng username
-        if (userService.findByUsername(username.trim()) != null) {
-            req.setAttribute("error", "Tên đăng nhập đã tồn tại!");
-            req.getRequestDispatcher("/views/auth/register.jsp").forward(req, resp);
-            return;
+        // 2. Server-side Validation: Email
+        if (email == null || email.trim().isEmpty()) {
+            errors.put("email", "Email không được để trống!");
+        } else if (!email.trim().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+            errors.put("email", "Email không đúng định dạng RFC (Ví dụ: name@domain.com)!");
+        } else if (userService.findByEmail(email.trim()) != null) {
+            errors.put("email", "Email này đã được đăng ký tài khoản khác!");
         }
 
-        // Kiểm tra trùng email
-        if (userService.findByEmail(email.trim()) != null) {
-            req.setAttribute("error", "Email này đã được sử dụng!");
+        // 3. Server-side Validation: Password
+        if (password == null || password.trim().length() < 6) {
+            errors.put("password", "Mật khẩu phải có tối thiểu 6 ký tự!");
+        }
+
+        // 4. Server-side Validation: Phone (Tùy chọn)
+        if (phone != null && !phone.trim().isEmpty() && !phone.trim().matches("^0[0-9]{9}$")) {
+            errors.put("phone", "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0!");
+        }
+
+        // Nếu có lỗi validation phía server
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("username", username);
+            req.setAttribute("email", email);
+            req.setAttribute("fullname", fullname);
+            req.setAttribute("phone", phone);
             req.getRequestDispatcher("/views/auth/register.jsp").forward(req, resp);
             return;
         }
@@ -70,6 +90,10 @@ public class RegisterController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/verify-otp");
         } else {
             req.setAttribute("error", "Đăng ký không thành công hoặc lỗi gửi mã OTP. Vui lòng thử lại!");
+            req.setAttribute("username", username);
+            req.setAttribute("email", email);
+            req.setAttribute("fullname", fullname);
+            req.setAttribute("phone", phone);
             req.getRequestDispatcher("/views/auth/register.jsp").forward(req, resp);
         }
     }

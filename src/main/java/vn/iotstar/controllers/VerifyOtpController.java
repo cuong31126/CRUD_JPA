@@ -1,6 +1,8 @@
 package vn.iotstar.controllers;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -51,8 +53,21 @@ public class VerifyOtpController extends HttpServlet {
         }
         String otp = req.getParameter("otp");
 
-        if (email == null || email.trim().isEmpty() || otp == null || otp.trim().isEmpty()) {
-            req.setAttribute("error", "Vui lòng nhập đầy đủ mã OTP!");
+        Map<String, String> errors = new HashMap<>();
+
+        if (email == null || email.trim().isEmpty()) {
+            errors.put("email", "Không tìm thấy thông tin email!");
+        }
+
+        if (otp == null || otp.trim().isEmpty()) {
+            errors.put("otp", "Vui lòng nhập mã OTP!");
+        } else if (!otp.trim().matches("^[0-9]{6}$")) {
+            errors.put("otp", "Mã OTP phải gồm đúng 6 chữ số!");
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("email", email);
             req.getRequestDispatcher("/views/auth/verify-otp.jsp").forward(req, resp);
             return;
         }
