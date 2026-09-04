@@ -87,6 +87,13 @@
 			<artifactId>angus-mail</artifactId>
 			<version>2.0.3</version>
 		</dependency>
+
+		<!-- SiteMesh 3 Decorator (Jakarta EE Compatible for Tomcat 10+) -->
+		<dependency>
+			<groupId>org.sitemesh</groupId>
+			<artifactId>sitemesh</artifactId>
+			<version>3.2.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>

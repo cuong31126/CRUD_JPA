@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemesh>
+    <!-- 1. Loại trừ các trang xác thực Auth và tài nguyên ảnh -->
+    <mapping path="/login" exclude="true"/>
+    <mapping path="/register" exclude="true"/>
+    <mapping path="/verify-otp" exclude="true"/>
+    <mapping path="/resend-otp" exclude="true"/>
+    <mapping path="/forgot-password" exclude="true"/>
+    <mapping path="/reset-password" exclude="true"/>
+    <mapping path="/image*" exclude="true"/>
+    <mapping path="/assets/*" exclude="true"/>
+
+    <!-- 2. Gán layout cho trang Admin -->
+    <mapping path="/admin/*" decorator="admin.jsp"/>
+
+    <!-- 3. Layout cho toàn bộ trang Web / User -->
+    <mapping path="/home" decorator="web.jsp"/>
+    <mapping path="/product*" decorator="web.jsp"/>
+    <mapping path="/*" decorator="web.jsp"/>
+</sitemesh>

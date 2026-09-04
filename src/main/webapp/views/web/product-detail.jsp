@@ -2,18 +2,10 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${product != null ? product.productName : 'Chi Tiết Sản Phẩm'} - Shop JPA</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
         .detail-card {
             border: none;
             border-radius: 16px;
@@ -46,9 +38,6 @@
 </head>
 <body>
 
-<!-- Navbar -->
-<jsp:include page="navbar.jsp" />
-
 <div class="container py-4 mb-5">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
@@ -61,117 +50,110 @@
 
     <c:choose>
         <c:when test="${product != null}">
-            <!-- Card Chi tiết sản phẩm -->
-            <div class="card detail-card p-4 p-md-5 mb-5">
+            <div class="card detail-card p-4 p-md-5">
                 <div class="row g-5">
-                    <!-- Cột Ảnh sản phẩm -->
+                    <!-- Ảnh sản phẩm -->
                     <div class="col-md-5 text-center">
                         <c:choose>
                             <c:when test="${product.images != null && product.images.startsWith('http')}">
-                                <c:url value="${product.images}" var="imgUrl" />
+                                <c:url value="${product.images}" var="pImg" />
                             </c:when>
                             <c:otherwise>
-                                <c:url value="/image?fname=${product.images}" var="imgUrl" />
+                                <c:url value="/image?fname=${product.images}" var="pImg" />
                             </c:otherwise>
                         </c:choose>
-                        <img src="${imgUrl}" alt="${product.productName}" class="main-product-img shadow-sm"
-                             onerror="this.src='https://via.placeholder.com/400x350'"/>
+                        <img src="${pImg}" alt="${product.productName}" class="main-product-img shadow-sm mb-3" onerror="this.src='https://via.placeholder.com/450'">
+                        
+                        <div class="d-flex justify-content-center gap-2">
+                            <span class="badge ${product.status == 1 ? 'bg-success' : 'bg-secondary'} px-3 py-2">
+                                <i class="fa-solid fa-circle-check me-1"></i>${product.status == 1 ? 'Đang kinh doanh' : 'Tạm hết hàng'}
+                            </span>
+                            <span class="badge bg-info text-dark px-3 py-2">
+                                <i class="fa-solid fa-cubes me-1"></i>Số lượng tồn: ${product.quantity}
+                            </span>
+                        </div>
                     </div>
 
-                    <!-- Cột Thông tin sản phẩm -->
+                    <!-- Thông tin chi tiết -->
                     <div class="col-md-7 d-flex flex-column justify-content-between">
                         <div>
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="badge bg-primary px-3 py-2 rounded-pill">
-                                    <i class="fa-solid fa-folder me-1"></i>${product.category != null ? product.category.categoryname : 'Chung'}
-                                </span>
-                                <c:if test="${product.status == 1}">
-                                    <span class="badge bg-success px-3 py-2 rounded-pill">Còn hàng</span>
-                                </c:if>
-                            </div>
-
+                            <span class="badge bg-primary fs-6 mb-2">
+                                <i class="fa-solid fa-layer-group me-1"></i>${product.category != null ? product.category.categoryname : 'Danh mục chung'}
+                            </span>
                             <h2 class="fw-bold text-dark mb-3">${product.productName}</h2>
-
-                            <div class="price-tag mb-3">
+                            
+                            <div class="price-tag mb-4">
                                 <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
                             </div>
 
-                            <div class="mb-4 text-muted">
-                                <p class="mb-1"><i class="fa-solid fa-boxes-stacked me-2 text-secondary"></i>Số lượng còn lại: <b class="text-dark">${product.quantity}</b> chiếc</p>
-                                <p class="mb-1"><i class="fa-regular fa-calendar-days me-2 text-secondary"></i>Ngày cập nhật: <fmt:formatDate value="${product.createDate}" pattern="dd/MM/yyyy HH:mm"/></p>
-                            </div>
-
-                            <hr>
-
-                            <div class="mb-4">
-                                <h5 class="fw-bold text-dark"><i class="fa-solid fa-circle-info me-2 text-primary"></i>Mô Tả Sản Phẩm:</h5>
-                                <p class="text-secondary lh-lg" style="white-space: pre-line;">
-                                    ${not empty product.description ? product.description : 'Đang cập nhật mô tả chi tiết cho sản phẩm này.'}
-                                </p>
-                            </div>
+                            <h5 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-circle-info me-2 text-primary"></i>Mô Tả Sản Phẩm:</h5>
+                            <p class="text-muted lead fs-6" style="line-height: 1.8;">
+                                ${product.description != null && !product.description.isEmpty() ? product.description : 'Sản phẩm chính hãng với chất lượng đảm bảo, đầy đủ chính sách bảo hành.'}
+                            </p>
                         </div>
 
-                        <div class="d-flex gap-3">
-                            <a href="<c:url value='/product'/>" class="btn btn-outline-secondary px-4 py-2">
-                                <i class="fa-solid fa-arrow-left me-2"></i>Quay lại danh sách
-                            </a>
-                            <button class="btn btn-warning px-4 py-2 fw-semibold text-dark" onclick="alert('Đã thêm sản phẩm vào giỏ hàng demo!')">
-                                <i class="fa-solid fa-cart-plus me-2"></i>Thêm Vào Giỏ Hàng
-                            </button>
+                        <!-- Các nút tương tác -->
+                        <div class="border-top pt-4 mt-4">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <button class="btn btn-warning btn-lg w-100 fw-bold text-dark py-3">
+                                        <i class="fa-solid fa-cart-arrow-down me-2"></i>Thêm Vào Giỏ Hàng
+                                    </button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <a href="<c:url value='/product'/>" class="btn btn-outline-secondary btn-lg w-100 py-3">
+                                        <i class="fa-solid fa-arrow-left me-2"></i>Xem Sản Phẩm Khác
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Sản phẩm liên quan cùng danh mục -->
+            <!-- Sản phẩm cùng loại gợi ý -->
             <c:if test="${not empty relatedProducts}">
                 <div class="mt-5">
-                    <h4 class="fw-bold mb-4 text-dark"><i class="fa-solid fa-tags text-primary me-2"></i>Sản Phẩm Cùng Danh Mục</h4>
+                    <h4 class="fw-bold mb-4"><i class="fa-solid fa-thumbs-up text-warning me-2"></i>Sản Phẩm Cùng Danh Mục</h4>
                     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-                        <c:forEach items="${relatedProducts}" var="rp">
-                            <c:if test="${rp.productId != product.productId}">
-                                <div class="col">
-                                    <div class="card related-card h-100 p-3">
-                                        <c:choose>
-                                            <c:when test="${rp.images != null && rp.images.startsWith('http')}">
-                                                <c:url value="${rp.images}" var="rImgUrl" />
-                                            </c:when>
-                                            <c:otherwise>
-                                                <c:url value="/image?fname=${rp.images}" var="rImgUrl" />
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <a href="<c:url value='/product/detail?id=${rp.productId}'/>" class="text-decoration-none text-dark">
-                                            <img src="${rImgUrl}" alt="${rp.productName}" class="card-img-top rounded" style="height: 160px; object-fit: cover;"
-                                                 onerror="this.src='https://via.placeholder.com/160'"/>
-                                            <div class="card-body p-2 mt-2">
-                                                <h6 class="card-title fw-bold text-truncate mb-1">${rp.productName}</h6>
-                                                <div class="text-danger fw-bold">
-                                                    <fmt:formatNumber value="${rp.price}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
-                                                </div>
-                                            </div>
-                                        </a>
+                        <c:forEach items="${relatedProducts}" var="rel">
+                            <div class="col">
+                                <div class="card related-card h-100 p-3">
+                                    <c:choose>
+                                        <c:when test="${rel.images != null && rel.images.startsWith('http')}">
+                                            <c:url value="${rel.images}" var="relImg" />
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:url value="/image?fname=${rel.images}" var="relImg" />
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <img src="${relImg}" alt="${rel.productName}" class="card-img-top rounded" style="height: 140px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/150'">
+                                    <div class="card-body p-2 d-flex flex-column justify-content-between mt-2">
+                                        <h6 class="card-title text-truncate fw-bold mb-1">
+                                            <a href="<c:url value='/product/detail?id=${rel.productId}'/>" class="text-dark text-decoration-none">${rel.productName}</a>
+                                        </h6>
+                                        <div class="text-danger fw-bold">
+                                            <fmt:formatNumber value="${rel.price}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
+                                        </div>
                                     </div>
                                 </div>
-                            </c:if>
+                            </div>
                         </c:forEach>
                     </div>
                 </div>
             </c:if>
+
         </c:when>
         <c:otherwise>
-            <div class="alert alert-warning text-center py-5">
+            <div class="alert alert-danger text-center p-5 shadow-sm rounded-4">
                 <i class="fa-solid fa-triangle-exclamation fa-3x mb-3"></i>
-                <h4>Không tìm thấy sản phẩm!</h4>
-                <p>Sản phẩm này có thể đã bị xóa hoặc không tồn tại.</p>
-                <a href="<c:url value='/product'/>" class="btn btn-primary mt-2">Xem Tất Cả Sản Phẩm</a>
+                <h3>Không tìm thấy sản phẩm!</h3>
+                <p class="text-muted">Sản phẩm bạn đang tìm kiếm có thể đã bị xóa hoặc không tồn tại.</p>
+                <a href="<c:url value='/product'/>" class="btn btn-primary mt-2"><i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách sản phẩm</a>
             </div>
         </c:otherwise>
     </c:choose>
 </div>
 
-<!-- Footer -->
-<jsp:include page="footer.jsp" />
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

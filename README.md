@@ -11,6 +11,7 @@ Hệ thống đã triển khai đầy đủ các phân hệ chức năng xác th
 * **Ngôn ngữ:** Java 17 (LTS)
 * **Web Server / Servlet Container:** Apache Tomcat 10.1.x (Jakarta EE 10)
 * **ORM & JPA:** Hibernate ORM 6.5.2.Final, Jakarta Persistence API 3.0
+* **Decorator Framework:** SiteMesh 3.2.3 (Jakarta EE Compatible / ConfigurableSiteMeshFilter)
 * **View Layer:** JSP 3.1, JSTL 3.0 (`jakarta.tags.core`, `jakarta.tags.fmt`), Bootstrap 5.3, FontAwesome 6
 * **Database:** Microsoft SQL Server (`LTWEB2`) với driver `mssql-jdbc 12.6.1`
 * **Email Service:** Jakarta Mail API 2.1 + Angus Mail 2.0 (SMTP Gmail TLS Port 587)

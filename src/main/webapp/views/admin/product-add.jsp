@@ -1,102 +1,158 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thêm Sản Phẩm Mới - Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .card-custom {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-    </style>
 </head>
 <body>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card card-custom p-4 p-md-5">
-                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                    <h3 class="fw-bold text-primary mb-0"><i class="fa-solid fa-plus-circle me-2"></i>Thêm Sản Phẩm Mới</h3>
-                    <a href="<c:url value='/admin/products'/>" class="btn btn-outline-secondary">
-                        <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách
-                    </a>
+<div class="container-fluid" style="max-width: 900px;">
+    <!-- Header & Back Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-cart-plus text-success me-2"></i>Thêm Sản Phẩm Mới
+            </h3>
+            <p class="text-muted mb-0">Điền thông tin chi tiết để thêm sản phẩm vào hệ thống</p>
+        </div>
+        <a href="<c:url value='/admin/products'/>" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách
+        </a>
+    </div>
+
+    <!-- Alert error -->
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>${error}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
+    <!-- Form Card -->
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-4 p-md-5">
+            <form action="<c:url value='/admin/product/insert'/>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                
+                <!-- Tên sản phẩm (Validation: 2 - 200 ký tự) -->
+                <div class="mb-4">
+                    <label for="productName" class="form-label fw-semibold">
+                        Tên Sản Phẩm <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fa-solid fa-box text-muted"></i></span>
+                        <input type="text" class="form-control" id="productName" name="productName" 
+                               required minlength="2" maxlength="200" 
+                               placeholder="Ví dụ: iPhone 15 Pro Max 256GB Titanium">
+                        <div class="invalid-feedback">Vui lòng nhập tên sản phẩm (2 - 200 ký tự).</div>
+                    </div>
                 </div>
 
-                <form action="<c:url value='/admin/product/insert'/>" method="post" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Tên Sản Phẩm <span class="text-danger">*</span></label>
-                        <input type="text" name="productName" class="form-control" placeholder="Nhập tên sản phẩm" required autofocus>
+                <div class="row g-3 mb-4">
+                    <!-- Danh mục sản phẩm (Validation: Bắt buộc chọn) -->
+                    <div class="col-md-6">
+                        <label for="categoryId" class="form-label fw-semibold">
+                            Thuộc Danh Mục <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="categoryId" name="categoryId" required>
+                            <option value="">-- Chọn danh mục --</option>
+                            <c:forEach items="${categories}" var="c">
+                                <option value="${c.categoryId}">${c.categoryname}</option>
+                            </c:forEach>
+                        </select>
+                        <div class="invalid-feedback">Vui lòng chọn danh mục cho sản phẩm.</div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Danh Mục <span class="text-danger">*</span></label>
-                            <select name="categoryId" class="form-select" required>
-                                <option value="">-- Chọn danh mục --</option>
-                                <c:forEach items="${categories}" var="cate">
-                                    <option value="${cate.categoryId}">${cate.categoryname}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Trạng Thái</label>
-                            <select name="status" class="form-select">
-                                <option value="1">Hoạt động (Hiển thị)</option>
-                                <option value="0">Khóa (Ẩn)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Giá Bán (VNĐ) <span class="text-danger">*</span></label>
-                            <input type="number" step="1000" name="price" class="form-control" placeholder="Ví dụ: 150000" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Số Lượng Trong Kho <span class="text-danger">*</span></label>
-                            <input type="number" name="quantity" class="form-control" placeholder="Ví dụ: 50" required>
+                    <!-- Đơn giá (Validation: min 0) -->
+                    <div class="col-md-6">
+                        <label for="price" class="form-label fw-semibold">
+                            Đơn Giá (VNĐ) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fa-solid fa-tag text-muted"></i></span>
+                            <input type="number" class="form-control" id="price" name="price" 
+                                   required min="0" step="1000" placeholder="500000">
+                            <span class="input-group-text">₫</span>
+                            <div class="invalid-feedback">Vui lòng nhập giá hợp lệ (>= 0).</div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Upload Hình Ảnh (File từ máy tính)</label>
-                        <input type="file" name="imageFile" class="form-control" accept="image/*">
-                        <small class="text-muted">Chọn file ảnh (.jpg, .png, .jpeg, .webp) để upload lên thư mục máy chủ.</small>
+                <div class="row g-3 mb-4">
+                    <!-- Số lượng tồn kho (Validation: min 0) -->
+                    <div class="col-md-6">
+                        <label for="quantity" class="form-label fw-semibold">
+                            Số Lượng Tồn Kho <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fa-solid fa-cubes text-muted"></i></span>
+                            <input type="number" class="form-control" id="quantity" name="quantity" 
+                                   required min="0" value="10" placeholder="10">
+                            <div class="invalid-feedback">Vui lòng nhập số lượng hợp lệ (>= 0).</div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Hoặc Đường Dẫn Ảnh Trực Tuyến (URL)</label>
-                        <input type="text" name="images" class="form-control" placeholder="https://example.com/image.jpg">
+                    <!-- Trạng thái kinh doanh -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold d-block">Trạng Thái Kinh Doanh</label>
+                        <div class="pt-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="statusActive" value="1" checked>
+                                <label class="form-check-label text-success fw-semibold" for="statusActive">
+                                    <i class="fa-solid fa-check-circle me-1"></i>Đang bán
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="statusInactive" value="0">
+                                <label class="form-check-label text-secondary fw-semibold" for="statusInactive">
+                                    <i class="fa-solid fa-ban me-1"></i>Tạm dừng
+                                </label>
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Mô Tả Sản Phẩm</label>
-                        <textarea name="description" rows="4" class="form-control" placeholder="Nhập thông tin mô tả chi tiết sản phẩm..."></textarea>
-                    </div>
+                <!-- Tải lên hình ảnh -->
+                <div class="mb-4">
+                    <label for="images" class="form-label fw-semibold">Ảnh Đại Diện Sản Phẩm</label>
+                    <input type="file" class="form-control" id="images" name="images" accept="image/*">
+                    <div class="form-text text-muted">Hỗ trợ các tệp ảnh .jpg, .png, .webp (Tối đa 10MB)</div>
+                </div>
 
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="<c:url value='/admin/products'/>" class="btn btn-secondary px-4">Hủy</a>
-                        <button type="submit" class="btn btn-primary px-5 fw-semibold">
-                            <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Sản Phẩm
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <!-- Mô tả chi tiết -->
+                <div class="mb-4">
+                    <label for="description" class="form-label fw-semibold">Mô Tả Chi Tiết Sản Phẩm</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" 
+                              placeholder="Nhập thông số kỹ thuật, bảo hành, đặc điểm nổi bật..."></textarea>
+                </div>
+
+                <!-- Nút Submit -->
+                <div class="d-flex justify-content-end gap-2 border-top pt-4">
+                    <a href="<c:url value='/admin/products'/>" class="btn btn-light border px-4">Hủy Bỏ</a>
+                    <button type="submit" class="btn btn-success px-4 fw-semibold">
+                        <i class="fa-solid fa-floppy-disk me-1"></i>Lưu Sản Phẩm
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+
 </body>
 </html>
