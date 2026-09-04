@@ -31,11 +31,15 @@ public class Category implements Serializable {
     private String images;
 
     @Column(name = "status")
-    private int status;
+    private Integer status = 1;
 
     // bi-directional many-to-one association to Video
     @OneToMany(mappedBy = "categories")
     private List<Video> videos;
+
+    // bi-directional many-to-one association to Product
+    @OneToMany(mappedBy = "category")
+    private List<Product> products;
 
     public Category() {
     }
@@ -73,11 +77,11 @@ public class Category implements Serializable {
         this.images = images;
     }
 
-    public int getStatus() {
-        return status;
+    public Integer getStatus() {
+        return status != null ? status : 1;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
@@ -87,6 +91,14 @@ public class Category implements Serializable {
 
     public void setVideos(List<Video> videos) {
         this.videos = videos;
+    }
+
+    public List<Product> getProducts() {
+        return this.products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 
     public Video addVideo(Video video) {

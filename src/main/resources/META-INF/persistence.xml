@@ -8,6 +8,8 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <class>vn.iotstar.entity.Category</class>
         <class>vn.iotstar.entity.Video</class>
+        <class>vn.iotstar.entity.User</class>
+        <class>vn.iotstar.entity.Product</class>
 
         <properties>
             <!-- Database Connection Settings for SQL Server -->
